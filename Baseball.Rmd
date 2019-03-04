@@ -28,4 +28,76 @@ library(leaps)
 regfit.full =regsubsets(Salary~.,data=Hitters)
 summary(regfit.full)
 ```
+Above is a summary of the top selected models, from p=1 to p=8.  Asterisks indicate the inclusion of a predictor in a given model (each row is a model).
+
+Note that, by default, the regsubsets() function considers from p=1 up to p=8.  However, we can set the "nvmax" parameter in order to increase the upper limit for p.  Below, we set it to 19.
+```{r}
+regfit.full=regsubsets(Salary~.,data=Hitters, nvmax=19)
+reg.summary = summary(regfit.full)
+```
+We can examine the residual sum of squares and the R-squared from the summary:
+```{r}
+names(reg.summary)
+```
+```{r}
+reg.summary$rss
+```
+Note that the residual sum of squares in monotonically decreasing as we increase to 19 predictors.
+```{r}
+reg.summary$rsq
+```
+
+Note that the R-squared value is monotonically increasing as we increase to 19 predictors.
+
+We can plot, RSS, the adjusted R-squared, C-p, and BIC for all 19 models to help us pick the optimal model.
+
+```{r}
+par(mfrow=c(2,2))
+plot(reg.summary$rss, xlab="Number of Variables", ylab="RSS", type='l')
+plot(reg.summary$adjr2, xlab="Number of Variables", ylab="Adjusted R-squared", type='l')
+plot(reg.summary$cp, xlab="Number of Variables", ylab="cp", type='l')
+plot(reg.summary$bic, xlab="Number of Variables", ylab="BIC", type='l')
+```
+We can found the extremum values indicating the top performing model according to each metric.
+```{r}
+which.min(reg.summary$rss)
+which.max(reg.summary$adjr2)
+which.min(reg.summary$cp)
+which.min(reg.summary$bic)
+```
+We can highlight these values on the graphs by doing the following:
+```{r}
+par(mfrow=c(2,2))
+
+plot(reg.summary$rss, xlab="Number of Variables", ylab="RSS", type='l')
+
+
+plot(reg.summary$adjr2, xlab="Number of Variables", ylab="Adjusted R-squared", type='l')
+points(11, reg.summary$adjr2[11], col="red", cex=2, pch=20)
+
+plot(reg.summary$cp, xlab="Number of Variables", ylab="cp", type='l')
+points(10, reg.summary$cp[10], col="red", cex=2, pch=20)
+
+plot(reg.summary$bic, xlab="Number of Variables", ylab="BIC", type='l')
+points(6, reg.summary$bic[6], col="red", cex=2, pch=20)
+```
+
+We can also use the plot() command that is built into the regsubsets() function.
+```{r}
+plot(regfit.full, scale="r2")
+plot(regfit.full, scale="adjr2")
+plot(regfit.full, scale="Cp")
+plot(regfit.full, scale="bic")
+```
+We can see from the above that several models share a BIC around -150, but the lowest BIC belongs to a six predictor model.  We can find out which predictors those are by calling the coef() functin on the regfit.full model.  Note we also have to specify the number of predictors (6).
+```{r}
+coef(regfit.full, 6)
+```
+Let's complete this exercise by constructing a linear model with these 6 predictors using the lm function.
+
+```{r}
+names(Hitters)
+lm.fit = lm(Salary~AtBat+Hits+Walks+CRBI+Division+PutOuts, data=Hitters)
+summary(lm.fit)
+```
 
