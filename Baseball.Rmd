@@ -1,0 +1,31 @@
+---
+title: "Baseball"
+output: html_document
+---
+
+Now we will aply the best subset selection approach to the Hitters dataset.  Recall, this involves evaluating all possible combinations of parameters for model selection.  
+
+```{r}
+library(ISLR)
+fix(Hitters)
+names(Hitters)
+nrow(Hitters)
+```
+Check the dimensions of the data.  Next, find the number of players that are missing salary data:
+```{r}
+dim(Hitters)
+sum(is.na(Hitters$Salary))
+```
+We see there are 322 players (n) with 20 data features (p).  Of the 322 players, 59 are missing salary data, so we will omit them from our analysis using the "na.omit" function.  Also, we recheck the dimension of the dataframe after applying na.omit.
+```{r}
+Hitters=na.omit(Hitters)
+dim(Hitters)
+```
+
+In order to perform the best subset selection using the regsubsets() function.
+```{r}
+library(leaps)
+regfit.full =regsubsets(Salary~.,data=Hitters)
+summary(regfit.full)
+```
+
