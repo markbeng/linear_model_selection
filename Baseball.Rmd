@@ -93,11 +93,20 @@ We can see from the above that several models share a BIC around -150, but the l
 ```{r}
 coef(regfit.full, 6)
 ```
-Let's complete this exercise by constructing a linear model with these 6 predictors using the lm function.
 
+
+We can also use forward or backward stepwise selection in order to generate our model.  We still use the regsubsets() function:
 ```{r}
-names(Hitters)
-lm.fit = lm(Salary~AtBat+Hits+Walks+CRBI+Division+PutOuts, data=Hitters)
-summary(lm.fit)
+regfit.fwd=regsubsets(Salary~., data=Hitters, nvmax=19, method="forward")
+summary(regfit.fwd)
+
+regfit.bwd=regsubsets(Salary~., data=Hitters, nvmax=19, method="backward")
+summary(regfit.bwd)
+```
+Interestingly, the models found by the forward stepwise, backward stepwise, and best subset are different for 7 predictors.
+```{r}
+coef(regfit.full, 7)
+coef(regfit.fwd, 7)
+coef(regfit.bwd, 7)
 ```
 
