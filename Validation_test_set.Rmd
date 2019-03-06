@@ -1,0 +1,52 @@
+---
+title: "Validation_set_test"
+output: html_document
+---
+We begin by splitting the "Hitters" dataset into a "test" group and "train" group.
+```{r}
+library(ISLR)
+fix(Hitters)
+library(leaps)
+
+set.seed(1)
+train=sample(c(TRUE,FALSE), nrow(Hitters), rep=TRUE)
+train
+```
+
+```{r}
+test=(!train)
+test
+```
+First, we generate the model using regsubsets() function.  Note that we use the [train,] subset of the Hitters dataset.
+
+```{r}
+regfit.best=regsubsets(Salary~., data=Hitters[train,], nvmax=19)
+```
+Now, we generate an "X" data matrix using the test data set.
+```{r}
+test.matrix = model.matrix(Salary~., data=Hitters[test,])
+test.matrix
+```
+Next, we run a for loop, and for each size of model i, we extract the coefficients from the regfit.best model, multiply them into the columns of the model.matrix to form the predictions, and then compute the MSE (mean squared error).
+```{r}
+val.errors=rep(NA,19)
+for(i in 1:19){
+  coefi=coef(regfit.best, id=i)
+  prediction = test.matrix[,names(coefi)]%*%coefi
+  val.errors[i]=mean((Hitters$Salary[test]-prediction)^2)
+}
+
+val.errors
+
+which.min(val.errors)
+```
+We can see from the above analysis that the test MSE is lowest for the model that utilized 10 predictors.  We can see what these 10 predictors were:
+```{r}
+coef(regfit.best, 10)
+```
+We can also rebuild the model using the full data set:
+```{r}
+fullregfit.best = regsubsets(Salary~., data=Hitters, nvmax=19)
+coef(fullregfit.best, 10)
+```
+Interestingly, the 10 predictors are not the same when we use the full data set to generate the model.
